@@ -1,4 +1,8 @@
 /* @flow */
+/**
+ * 该文件主要是一些公共的小组件，
+ * @type {Object}
+ */
 
 export const emptyObject = Object.freeze({})
 
@@ -22,6 +26,7 @@ export function isFalse (v: any): boolean %checks {
 
 /**
  * Check if value is primitive
+ * 检测是否是原始类型
  */
 export function isPrimitive (value: any): boolean %checks {
   return (
@@ -37,6 +42,7 @@ export function isPrimitive (value: any): boolean %checks {
  * Quick object check - this is primarily used to tell
  * Objects from primitive values when we know the value
  * is a JSON-compliant type.
+ * 检测value是否为object
  */
 export function isObject (obj: mixed): boolean %checks {
   return obj !== null && typeof obj === 'object'
@@ -44,6 +50,7 @@ export function isObject (obj: mixed): boolean %checks {
 
 /**
  * Get the raw type string of a value e.g. [object Object]
+ * 获取原始类型 比如 Function Object Array
  */
 const _toString = Object.prototype.toString
 
@@ -52,6 +59,7 @@ export function toRawType (value: any): string {
 }
 
 /**
+ * 检测是否是严格的对象
  * Strict object type check. Only returns true
  * for plain JavaScript objects.
  */
@@ -59,11 +67,18 @@ export function isPlainObject (obj: any): boolean {
   return _toString.call(obj) === '[object Object]'
 }
 
+/**
+ * 检测是否是正则表达式
+ * @param v
+ * @returns {boolean}
+ */
 export function isRegExp (v: any): boolean {
   return _toString.call(v) === '[object RegExp]'
 }
 
 /**
+ * 检测value是否为合法的数组下标
+ * isFinite 判定一个数字是否是有限数字
  * Check if val is a valid array index.
  */
 export function isValidArrayIndex (val: any): boolean {
