@@ -6,8 +6,8 @@
 
 export const emptyObject = Object.freeze({})
 
-// these helpers produces better vm code in JS engines due to their
-// explicitness and function inlining
+// These helpers produce better VM code in JS engines due to their
+// explicitness and function inlining.
 export function isUndef (v: any): boolean %checks {
   return v === undefined || v === null
 }
@@ -88,6 +88,14 @@ export function isValidArrayIndex (val: any): boolean {
   return n >= 0 && Math.floor(n) === n && isFinite(val)
 }
 
+export function isPromise (val: any): boolean {
+  return (
+    isDef(val) &&
+    typeof val.then === 'function' &&
+    typeof val.catch === 'function'
+  )
+}
+
 /**
  * 将value转化为字符串
  * JSON.stringify 有三个参数
@@ -99,7 +107,7 @@ export function isValidArrayIndex (val: any): boolean {
 export function toString (val: any): string {
   return val == null
     ? ''
-    : typeof val === 'object'
+    : Array.isArray(val) || (isPlainObject(val) && val.toString === _toString)
       ? JSON.stringify(val, null, 2)
       : String(val)
 }
@@ -227,11 +235,11 @@ export const hyphenate = cached((str: string): string => {
 })
 
 /**
- * Simple bind polyfill for environments that do not support it... e.g.
- * PhantomJS 1.x. Technically we don't need this anymore since native bind is
- * now more performant in most browsers, but removing it would be breaking for
- * code that was able to run in PhantomJS 1.x, so this must be kept for
- * backwards compatibility.
+ * Simple bind polyfill for environments that do not support it,
+ * e.g., PhantomJS 1.x. Technically, we don't need this anymore
+ * since native bind is now performant enough in most browsers.
+ * But removing it would mean breaking code that was able to run in
+ * PhantomJS 1.x, so this must be kept for backward compatibility.
  */
 
 /* istanbul ignore next */
@@ -296,11 +304,13 @@ export function toObject (arr: Array<any>): Object {
   return res
 }
 
+/* eslint-disable no-unused-vars */
+
 /**
  * 空函数
  * Perform no operation.
  * Stubbing args to make Flow happy without leaving useless transpiled code
- * with ...rest (https://flow.org/blog/2017/05/07/Strict-Function-Call-Arity/)
+ * with ...rest (https://flow.org/blog/2017/05/07/Strict-Function-Call-Arity/).
  */
 export function noop (a?: any, b?: any, c?: any) {}
 
@@ -309,6 +319,8 @@ export function noop (a?: any, b?: any, c?: any) {}
  * Always return false.
  */
 export const no = (a?: any, b?: any, c?: any) => false
+
+/* eslint-enable no-unused-vars */
 
 /**
  * 返回本身
@@ -345,6 +357,8 @@ export function looseEqual (a: any, b: any): boolean {
         return a.length === b.length && a.every((e, i) => {
           return looseEqual(e, b[i])
         })
+      } else if (a instanceof Date && b instanceof Date) {
+        return a.getTime() === b.getTime()
       } else if (!isArrayA && !isArrayB) {
         const keysA = Object.keys(a)
         const keysB = Object.keys(b)
@@ -367,6 +381,9 @@ export function looseEqual (a: any, b: any): boolean {
 }
 
 /**
+* Return the first index at which a loosely equal value can be
+* found in the array (if value is a plain object, the array must
+* contain an object of the same shape), or -1 if it is not present.
  * 返回val在数组中宽松相等的第一次出现下标
  */
 export function looseIndexOf (arr: Array<mixed>, val: mixed): number {
